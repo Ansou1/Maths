@@ -1,0 +1,93 @@
+#!/usr/bin/python
+# -*- encoding:utf-8 -*-
+
+import sys, math, datetime
+import pylab as plt
+import numpy as np
+from math import *
+
+def binomialCoefficient(n, k):
+    if k < 0 or k > n:
+        return 0
+    if k == 0 or k == n:
+        return 1
+    diff = n - k
+    if k > diff:
+        k = diff
+    c = 1
+    for i in range(k):
+        c = c * (n - i) / (i + 1)
+    return c
+
+def binomial(n):
+    tab = []
+    p = float(n) / (8.0 * 3600.0);
+    i = 0
+    p_encombre = 0.0
+    while (i < 50):
+        tab.append(binomialCoefficient(3500, i) * math.pow(p, i) * math.pow(1 - p, 3500 - i))
+        i += 1
+    time_begin = datetime.datetime.now()
+    i = 0
+    while (i <= 25):
+        p_encombre += (binomialCoefficient(3500, i) * math.pow(p, i) * math.pow(1 - p, 3500 - i)) * 100
+        i+=1
+    time_done = datetime.datetime.now() - time_begin
+    print "loi binomial :\n\t\ttemps de calcul:\t\t%.2f ms\n\t\tprobabilite d'encombrement:\t%.1f %%" % (time_done.microseconds / 10, 100 - p_encombre)
+    return tab
+
+def loiPoisson(n):
+    tab = []
+    k = 3500.0 / (8.0 * 3600.0) * float(n)
+    i = 0
+    p_encombre = 0.0
+    while (i < 50):
+        tab.append(math.exp(-k) * math.pow(k, i) / math.factorial(i))
+        i += 1
+    time_begin = datetime.datetime.now()
+    i = 0
+    while (i <= 25):
+        p_encombre += (math.exp(-k) * math.pow(k, i) / math.factorial(i)) * 100
+        i+=1
+    time_done = datetime.datetime.now() - time_begin
+    print "loi de Poisson :\n\t\ttemps de calcul:\t\t%.2f ms\n\t\tprobabilite d'encombrement:\t%.1f %%" % (time_done.microseconds / 10, 100 - p_encombre)
+    return tab;
+
+def main(args):
+
+    if len(args) != 2 and len(args) != 1:
+       print "USAGE: ./203hotline k n"
+       sys.exit(2)
+
+    if len(args) == 1:
+        try:
+            k = int(args[0])
+        except:
+            print "[k] must be an integer"
+            sys.exit(2)
+
+        tabb = binomial(k);
+        tabp = loiPoisson(k)
+        absc = np.arange(0, 50, 1)
+        width = 0.50
+        fig, ax = plt.subplots()
+        rects1 = ax.bar(absc, tabb, width, color='red')
+        rects2 = ax.bar(absc + width, tabp, width, color='blue')
+        ax.legend((rects1[0], rects2[0]), ('Loi binomiale','Loi de poisson'))
+        ax.set_xlabel('nb d\'appels simultanes')
+        ax.set_ylabel('Probabilite')
+        ax.set_title('203Hotline')
+        plt.grid(True)
+        plt.show()
+
+    if len(args) == 2:
+        try:
+            k = int(args[0])
+            n = int(args[1])
+        except:
+            print "[k] and [n] must be an integer"
+            sys.exit(2)
+        print "combinaison de %d parmi %d : %d" % (k, n, binomialCoefficient(n, k))
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
