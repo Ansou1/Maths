@@ -1,0 +1,75 @@
+#!/usr/bin/python
+# -*- encoding:utf-8 -*-
+
+import sys, math, datetime
+import pylab as plt
+import numpy as np
+from math import *
+
+def main(args):
+
+    if len(args) != 1:
+       print "USAGE: ./204canard a with a between 0 and 2.5"
+       sys.exit(2)
+
+    if len(args) == 1:
+       try:
+           a = float(args[0])
+       except:
+           print "a must be a number"
+           sys.exit(2)
+
+       if a < 0 or a > 2.5:
+           print "a must be between 0 and 2.5"
+           sys.exit(2)
+
+       absc = np.arange(0.0, 10.01, 0.01)
+       tab = []
+       t = 0.0
+       while (t <= 10.0):
+           tab.append(a * math.exp(-t) + (4 - 3 * a) * math.exp(-2 * t) + (2 * a - 4) * math.exp(-4 * t))
+           t += 0.01
+
+       pourcentage1 = 0.0
+       pourcentage2 = 0.0
+       res99 = []
+       res99.append(0)
+       res99.append(0)
+       res50 = []
+       res50.append(0)
+       res50.append(0)
+       res = 0.0
+       tab2 = []
+       t = 0.0
+       while (t <= 10.0):
+          res += (a * math.exp(-t) + (4 - 3 * a) * math.exp(-2 * t) + (2 * a - 4) * math.exp(-4 * t))
+          tab2.append(res / 100)
+          if t < 1.01:
+              pourcentage1 = int(res)
+          elif t < 2.01:
+              pourcentage2 = int(res)
+          if res < 50.01:
+              res50[0] = int(t)
+              res50[1] = int(t %1 * 60)
+          elif res < 99.01:
+              res99[0] = int(t)
+              res99[1] = int(t %1 * 60)
+          t += 0.01
+
+       #print "temps de retour moyen :                              %d minutes(s) et %d secondes"         % (1, 11)
+       #print "ecart-type des temps de retour :                     %f"                                   % (1.001)
+       print "temps au bout duquel 50%% des canards sont revenus :  %d minutes(s) et %d secondes"        % (res50[0], res50[1])
+       print "temps au bout duquel 99%% des canards sont revenus :  %d minutes(s) et %d secondes"        % (res99[0], res99[1])
+       print "pourcentage de canards revenus apres 1 minutes :     %d %%"                                % (pourcentage1)
+       print "pourcentage de canards revenus apres 2 minutes :     %d %%"                                % (pourcentage2)
+
+       plt.plot(absc, tab2, label="repartition", color='b')
+       plt.plot(absc, tab, label="densite", color='r')
+       plt.xlabel("temps (minutes)");
+       plt.ylabel("probabilite");
+       plt.title("204canard")
+       plt.legend()
+       plt.show()
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
