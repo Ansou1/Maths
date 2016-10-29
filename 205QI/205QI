@@ -1,0 +1,135 @@
+#!/usr/bin/python
+# -*- encoding:utf-8 -*-
+
+import sys, math, datetime
+import pylab as plt
+import numpy as np
+from math import *
+
+def option1(a, b):
+    tab = []
+    i = 0.0;
+    nb = 0.0
+    res = 0.0
+    it = 0.0
+    while i < 200.0:
+      nb = - (math.pow(i - a, 2) / (2 * math.pow(b, 2)))
+      res += (1 / (b * math.sqrt(2 * math.pi))) * math.exp(nb)
+      tab.append(res)
+      i += 0.01
+
+    absc = np.arange(0.0, 200.01, 0.01)
+    plt.plot(absc, tab, label="repartition", color='b')
+    plt.xlabel("QI");
+    plt.ylabel("probabilite (%)");
+    plt.title("205QI")
+    plt.legend()
+    plt.show()
+
+def option2(a, b, c):
+    tab = []
+    i = 0
+    nb = 0.0
+    res = 0.0
+    while i < c:
+      nb = - (math.pow(i - a, 2) / (2 * math.pow(b, 2)))
+      res += (1 / (b * math.sqrt(2 * math.pi))) * math.exp(nb)
+      tab.append(res)
+      i += 0.01
+    print "\033[32m%.1f%% des personnes ont un QI inférieur à %d\033[0m" % (res, c)
+
+    choix = raw_input("\033[33mDo you want to display a graphic [o/n]\n\033[0m")
+    if choix in ('o', 'O'):
+        absc = np.arange(0.0, c, 0.01)
+        plt.plot(absc, tab, label="repartition", color='b')
+        plt.xlabel("QI");
+        plt.ylabel("probabilite (%)");
+        plt.title("205QI")
+        plt.legend()
+        plt.show()
+
+def option3(a, b, c, d):
+    tab = []
+    res = 0.0
+    nb = 0.0
+    tmp = c
+    while c < d:
+      nb = - (math.pow(c - a, 2) / (2 * math.pow(b, 2)))
+      res += (1 / (b * math.sqrt(2 * math.pi))) * math.exp(nb)
+      tab.append(res)
+      c += 0.01
+    print "\033[32m%.1f%% des personnes ont un QI compris entre %d et %d\033[0m" % (res, tmp, d)
+
+    choix = raw_input("\033[33mDo you want to display a graphic [o/n]\n\033[0m")
+    if choix in ('o', 'O'):
+        absc = np.arange(tmp, d, 0.01)
+        plt.plot(absc, tab, label="repartition", color='b')
+        plt.xlabel("QI");
+        plt.ylabel("probabilite (%)");
+        plt.title("205QI")
+        plt.legend()
+        plt.show()
+
+def main(args):
+
+    if len(args) > 4 or len(args) <= 1:
+       print "\033[31m##\033[36m USAGE: [option 1]\033[33m ./205QI moyenne ecart_type [GRAPHIQUE OPTION] \033[31m##\033[0m"
+       print "\033[31m##\033[36m USAGE: [option 2]\033[33m ./205QI moyenne ecart_type QI \033[31m##\033[0m"
+       print "\033[31m##\033[36m USAGE: [option 3]\033[33m ./205QI moyenne ecart_type QI_inférieur QI_supérieur \033[31m##\033[0m"
+       sys.exit(2)
+
+    if len(args) == 2:
+       try:
+           a = float(args[0])
+           b = float(args[1])
+       except:
+           print "\033[31m## The parametres must be a number ##\033[0m"
+           sys.exit(2)
+       if b < 0:
+           print "\033[31m## The ecart_type must be positif ##\033[0m"
+           sys.exit(2)
+       option1(a, b)
+
+    if len(args) == 3:
+       try:
+           a = float(args[0])
+           b = float(args[1])
+           c = int(args[2])
+       except:
+           print "\033[31m## The parametres must be a number ##\033[0m"
+           print "\033[31m## The third parametre must be integer ##\033[0m"
+           sys.exit(2)
+       if c > 200:
+           print "\033[31m## A QI over 200 is impossible ##\033[0m"
+           sys.exit(2)
+       if b < 0:
+           print "\033[31m## The ecart_type must be positif ##\033[0m"
+           sys.exit(2)
+       if c < 0:
+           print "\033[31m## QI must be positif ##\033[0m"
+           sys.exit(2)
+       option2(a, b, c)
+
+    if len(args) == 4:
+       try:
+           a = float(args[0])
+           b = float(args[1])
+           c = int(args[2])
+           d = int(args[3])
+       except:
+           print "\033[31m## The parametres must be a number ##\033[0m"
+           print "\033[31m## The third and the fourth parametre must be integer ##\033[0m"
+           sys.exit(2)
+       if b < 0:
+           print "\033[31m## The ecart_type must be positif ##\033[0m"
+           sys.exit(2)
+       if c > 200 or d > 200 or c > d:
+           print "\033[31m## A QI over 200 is impossible and QI_inférieur must be lower than QI_supérieur ##\033[0m"
+           sys.exit(2)
+       if c < 0 or d < 0:
+           print "\033[31m## QI must be positif ##\033[0m"
+           sys.exit(2)
+       option3(a, b, c, d)
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
