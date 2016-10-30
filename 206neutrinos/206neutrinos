@@ -1,0 +1,92 @@
+#!/usr/bin/python
+# -*- encoding:utf-8 -*-
+
+import sys, math
+from math import *
+
+def moyenne_arithmetique(a, b, tmp_a, nbrAdd):
+    return ((a * b + nbrAdd) / (tmp_a))
+
+def moyenne_quadriatique(a, b, d, tmp_a, nbrAdd):
+    return math.sqrt((((pow(d, 2) + pow(b, 2)) * a) + pow(nbrAdd, 2)) / tmp_a)
+
+def moyenne_harmonique(a, c, tmp_a, nbrAdd):
+    return (tmp_a / ((1 / nbrAdd) + (a / c)))
+
+def ecart_type(a, b, d, tmp_a, tmp_b, nbrAdd):
+    return math.sqrt(((((pow(d, 2) + pow(b, 2)) * a) + pow(nbrAdd, 2)) / tmp_a) - pow(tmp_b, 2))
+
+def main(args):
+
+    if len(args) != 4:
+        print "\033[31m##\033[36m Brug: \033[33m ./206neutrinos [navn1 > 1] [navn2 > 0] [navn3 > 0] [navn4 > 0] \033[31m##\033[0m"
+        sys.exit(2)
+    try:
+        a = int(args[0])
+        b = float(args[1])
+        c = float(args[2])
+        d = float(args[3])
+    except:
+        print "\033[31mDisse argumenter skaj vaere tal \033[0m"
+        sys.exit(2)
+
+    if a < 1 or b < 0 or c < 0 or d < 0:
+        print "\033[31mDarlige argumenter ikke negativt tal \033[0m"
+        print "\033[31m##\033[36m Brug: \033[33m ./206neutrinos [navn1 > 1] [navn2 > 0] [navn3 > 0] [navn4 > 0] \033[31m##\033[0m"
+        sys.exit(2)
+
+    print "\033[33mIndsæt venligst \"ende\", hvis du ønsker at forlade den software => som: [indtast larmen vaerdi: ende]\033[0m"
+
+    choix = raw_input("\033[33mØnsker du at gemme alle data i en fil [j/i]\n\033[0m")
+    if choix in ('j', 'J'):
+        fichier = open("datafil","w")
+        fichier.close()
+
+    if choix in ('j', 'J'):
+        fichier = open("datafil","a")
+
+    continuer = True
+    while continuer:
+        nbr = raw_input("\033[32mindtast din vaerdi : \033[0m")
+        if nbr == "ende":
+            continuer = False
+        else:
+            try:
+                nbr = float(nbr)
+                tmp_a = a + 1
+                tmp_b = moyenne_arithmetique(a, b, tmp_a, nbr);
+                res = moyenne_quadriatique(a, b, d, tmp_a, nbr);
+                tmp_c = moyenne_harmonique(a, c, tmp_a, nbr);
+                tmp_d = ecart_type(a, b, d, tmp_a, tmp_b, nbr);
+
+                if choix in ('j', 'J'):
+                    fichier.write("\033[32mindtast din vaerdi :  %f\n\033[0m" % (nbr))
+                    fichier.write("\033[32m\tantal malinder :\t%2.f\n\tstandardafvilgelse :\t%2.2f\n\taritmetisk gennemsnit :\t%2.2f\n\tkvadratisk gennemsnit :\t%2.2f\n\tharmonisk  gennemsnit :\t%2.2f\n\n\033[0m" % (tmp_a, tmp_d, tmp_b, res, tmp_c))
+
+                print "\033[32m\tantal malinder :\t%2.f\n\tstandardafvilgelse :\t%2.2f\n\taritmetisk gennemsnit :\t%2.2f\n\tkvadratisk gennemsnit :\t%2.2f\n\tharmonisk  gennemsnit :\t%2.2f\n\n\033[0m" % (tmp_a, tmp_d, tmp_b, res, tmp_c)
+
+                a = tmp_a
+                b = tmp_b
+                c = tmp_c
+                d = tmp_d
+
+                tmp_a = 0.0
+                tmp_b = 0.0
+                tmp_c = 0.0
+                tmp_d = 0.0
+
+            except:
+                if choix in ('j', 'J'):
+                    fichier.write("\033[32mindtast din vaerdi :  %s\n\033[0m" % (nbr))
+                    fichier.write("\033[31mDet er ikke et tal\n\033[0m")
+                print "\033[31mDet er ikke et tal\033[0m"
+                pass
+
+    if choix in ('j', 'J'):
+        print "\033[33mLogfilen indeholder seneste aktiviteter\033[0m"
+        fichier.close()
+
+    print "\033[33mProjekt udført af daguen_s og corrad_f.\033[0m"
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
