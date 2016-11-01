@@ -1,0 +1,174 @@
+#!/usr/bin/python
+# -*- encoding:utf-8 -*-
+
+import sys, math, datetime
+import pylab as plt
+import numpy as np
+import csv
+from math import *
+
+def calcul_coef_ajust(annee, population, a, b):
+
+	xsomme = 0.0
+	ysomme = 0.0
+	xysomme = 0.0
+	xxsomme = 0.0
+
+	i = 0
+	while i < 51:
+		xsomme += annee[i]
+		ysomme += population[i]
+		xysomme += annee[i] * population[i]
+		xxsomme += annee[i] * annee[i]
+		i += 1
+
+	b = (ysomme * xxsomme - xsomme * xysomme) / (51.0 * xxsomme - xsomme * xsomme)
+	a = (51.0 * xysomme - xsomme * ysomme) / (51.0 * xxsomme - xsomme * xsomme)
+	return a, b
+
+def main(args):
+
+	if len(args) == 0:
+		print "\033[31m##\033[36m Usage: \033[33m ./207demographie country_Code [...]\033[31m ##\033[0m"
+		sys.exit(2)
+
+	try:
+		#mise en mémoire de toutes les données
+		with open("207demographie_donnees.csv", "rb") as f:
+			liste = []
+			for ligne in csv.reader(f, delimiter=';', quoting = csv.QUOTE_NONE):
+				liste.append(ligne)
+	except:
+		print "\033[31mERROR in loading 207demographie_donnees.csv, no such file.\033[0m"
+		sys.exit(2)
+
+	#récupération du nom du pays via son code plus check d'erreur en cas ou ;)
+	#je dois faire une boucle pour additioner les population dans une seule liste
+	print "\033[35mpays :\033[0m"
+
+	population = []
+	annee = []
+	name_pays = []
+
+	i = 0
+	while i < 51:
+		population.append(0.0)
+		i += 1
+
+	it = 2
+	while it < 53:
+		annee.append(float(liste[0][it]))
+		it += 1
+
+	for pays in args:
+		i = 0
+		while i < 247:
+			if liste[i][1] == pays:
+				for count in name_pays:
+					if count == pays:
+						print "\033[31mERROR: this code \033[33m%s\033[31m is already use one time for \033[33m%s\033[31m.\033[0m" % (pays, liste[i][0])
+						sys.exit(2)
+				print "\t", "\033[33m", liste[i][0], "\033[0m"
+				tmp = []
+				it = 2
+				while it < 53:
+					try:
+						tmp.append(float(liste[i][it].replace(",", ".")))
+					except:
+						print "\033[31mERROR in loading data, must be a null value.\033[0m"
+						sys.exit(2)
+					it += 1
+				vector1 = np.array(tmp)
+				vector2 = np.array(population)
+				population = vector1 + vector2
+				name_pays.append(pays)
+				break
+			if i == 246:
+				print "\033[31mERROR: this code doesn't exist \033[33m%s\033[31m.\033[0m" % (pays)
+				sys.exit(2)
+			i += 1
+
+	abscpop = np.arange(1961, len(population) + 1961, 1)
+	abscXY = np.arange(1961, 2050, 1)
+	abscYX = np.arange(1961, 2050, 1)
+
+	#calcul de l'ajustement de X sur Y
+	a = 0.0
+	b = 0.0
+	ecty = 0.0
+	print "\033[35majustement de X sur Y:\033[0m"
+
+	a, b = calcul_coef_ajust(annee, population, a, b)
+
+	tabXY = []
+	i = 1961.0
+	while i < 2050:
+		tabXY.append((a * i + b) / 1000000.0)
+		i += 1.0
+
+	x = 0
+	res = 0.0
+	while x < 51:
+		res += pow(population[x] - (tabXY[x] * 1000000.0), 2)
+		x += 1
+
+	res /= 51
+	res = sqrt(res)
+	res /= 1000000.0
+
+	print "\033[32m\tY = \033[33m%0.2f \033[32mX \033[33m%0.2f\033[0m" % (a / 1000000, b / 1000000)
+	print "\033[32m\técart-type:\t\t\t\t\033[33m%0.2f" % (res)
+	print "\033[32m\testimation de la population en 2050 :   \033[33m%0.2f\033[0m" % ((a * 2050 + b) / 1000000)
+
+        #calcul de l'ajustement de Y sur X
+	a2 = 0.0
+	b2 = 0.0
+	ecty2 = 0.0
+	print "\033[35majustement de Y sur X:\033[0m"
+
+	a2, b2 = calcul_coef_ajust(population, annee, a2, b2)
+
+	tabYX = []
+	i = 1961.00
+	while i < 2050:
+		tabYX.append(((i - b2) / (a2 * 1000000)))
+		i += 1.0
+
+	x = 0
+	res = 0.0
+	while x < 51:
+		res += pow(population[x] - ((annee[x] - b2) / a2), 2)
+		x += 1
+
+	res /= 51
+	res = sqrt(res)
+	res /= 1000000.0
+
+	print "\033[32m\tX = \033[33m%0.2f\033[32m Y + \033[33m%0.2f\033[0m" % (a2 * 1000000, b2)
+	print "\033[32m\técart-type:\t\t\t\t\033[33m%0.2f" % (res)
+	print "\033[32m\testimation de la population en 2050 :   \033[33m%0.2f\033[0m" % (((2050 - b2) / a2) / 1000000)
+
+	#calcul du coefficient de corrélation
+	array = np.corrcoef([annee, population])
+	print "\033[36mcoefficient de corrélation : \033[33m%0.4f\033[0m" % (array[0][1])
+
+	#mise a l'échelle million de la population
+	x = 0
+	while x < 51:
+	    population[x] /= 1000000.0
+	    x += 1
+
+	#affichage du diagramme
+	plt.plot(abscpop, population, label="moyenne demographique", color='b')
+	plt.plot(abscXY, tabXY, label="ajustement de X sur Y", color='g')
+	plt.plot(abscYX, tabYX, label="ajustement de Y sur X", color='r')
+	plt.xlabel("Annees");
+	plt.ylabel("Population");
+	plt.title("207demographie")
+	plt.legend()
+	plt.show()
+
+	print "\033[33mSoftware realized by corrad_f and daguen_s.\033[0m"
+
+if __name__ == "__main__":
+        main(sys.argv[1:])
