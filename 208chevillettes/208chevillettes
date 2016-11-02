@@ -1,0 +1,285 @@
+#!/usr/bin/python
+# -*- encoding:utf-8 -*-
+
+import sys, math
+import pylab as plt
+import numpy as np
+from math import *
+
+int_tab = [99, 90, 80, 70, 60, 50, 40, 30, 20, 10, 5, 2, 1]
+tab = [[0 for x in xrange(10)] for x in xrange(12)]
+tab[0] = [0.00, 0.02, 0.06, 0.15, 0.27, 0.45, 0.71, 1.07, 1.64, 2.71, 3.84, 5.41, 6.63]
+tab[1] = [0.02, 0.21, 0.45, 0.71, 1.02, 1.39, 1.83, 2.41, 3.22, 4.61, 5.99, 7.82, 3.21]
+tab[2] = [0.11, 0.58, 1.01, 1.42, 1.87, 2.37, 2.95, 3.66, 4.64, 6.25, 7.81, 9.84, 11.34]
+tab[3] = [0.30, 1.06, 1.65, 2.19, 2.75, 3.36, 4.04, 4.88, 5.99, 7.78, 9.49, 9.84, 11.34]
+tab[4] = [0.55, 1.61, 2.34, 3.00, 3.66, 4.35, 5.13, 6.06, 7.29, 9.24, 11.07, 11.67, 13.28]
+tab[5] = [0.7, 2.20, 3.07, 3.83, 4.57, 5.35, 6.21, 7.23, 8.56, 10.64, 12.59, 15.03, 16.81]
+tab[6] = [1.24, 2.83, 3.82, 4.67, 5.49, 6.35, 7.28, 8.38, 9.80, 12.02, 14.07, 16.62, 18.48]
+tab[7] = [1.65, 3.49, 4.59, 5.53, 6.42, 7.34, 8.35, 9.52, 11.03, 13.36, 15.51, 18.17, 20.09]
+tab[8] = [2.09, 4.17, 5.38, 6.39, 7.36, 8.34, 9.41, 10.66, 12.24, 14.68, 16.92, 19.68, 21.67]
+tab[9] = [2.56, 4.87, 6.18, 7.27, 8.30, 9.34, 10.47, 11.78, 13.44, 15.99, 18.31, 21.16, 23.21]
+
+def right_pur(v, som):
+
+	try:
+		i = 0
+		while tab[v][i] and tab[v][i] < som:
+			i = i + 1
+		if i == 0:
+			return (int_tab[0])
+		return (int_tab[i])
+	except:
+		print "\033[31mERROR in table, value [%0.3f] is out of range.\033[0m" % som
+		sys.exit(2)
+
+def left_pur(v, som):
+
+	try:
+		i = 0
+		while tab[v][i] and tab[v][i] < som:
+			i = i + 1
+		if i == 0:
+			return (int_tab[1])
+		if i == 8:
+			return (int_tab[7])
+		return (int_tab[i +1])
+	except:
+		print "\033[31mERROR in table, value [%0.3f] is out of range.\033[0m" % som
+		sys.exit(2)
+
+def agregation(o1, o2, o3, o4, o5, o6, o7, o8, o9):
+
+	value = []
+	tmp = []
+	i = 0
+	if o1 < 10 or o2 < 10:
+		tmp.append(o1 + o2)
+	else:
+		tmp.append(o1)
+		tmp.append(o2)
+
+	tmp.append(o3)
+	tmp.append(o4)
+	tmp.append(o5)
+	tmp.append(o6)
+	tmp.append(o7)
+
+	if o8 < 10 or o9 < 10:
+		tmp.append(o8 + o9)
+	else:
+		tmp.append(o8)
+		tmp.append(o9)
+
+	while i < len(tmp):
+		if tmp[i] >= 10:
+			value.append(tmp[i])
+		else:
+			res = 0
+			while res < 10 and i < len(tmp):
+				res += tmp[i]
+				i += 1
+			value.append(res)
+			i -= 1
+		i += 1
+	return value
+
+def agregation_theorique(o1, o2, o3, o4, o5, o6, o7, o8, o9, t, sec, value):
+
+	print "\033[33mx    |",
+	sec2 = []
+	t2 = []
+	tmp = []
+
+	tmp.append(o1)
+	tmp.append(o2)
+	tmp.append(o3)
+	tmp.append(o4)
+	tmp.append(o5)
+	tmp.append(o6)
+	tmp.append(o7)
+	tmp.append(o8)
+	tmp.append(o9)
+
+	i = 0
+	j = 0
+	while i  < len(value):
+		if tmp[j] == value[i]:
+			sec2.append(sec[j])
+			t2.append(t[j])
+			print "\t%d\t|" % j,
+			i += 1
+			j += 1
+		else:
+			res = 0
+			rest = 0.0
+			sect = 0.0
+			print "\t%d -" % j,
+			while res != value[i]:
+				res += tmp[j]
+				rest += t[j]
+				sect += sec[j]
+				j += 1
+			print "%d\t|" % (j - 1),
+			i += 1
+			sec2.append(sect)
+			t2.append(rest)
+	print " total   "
+	return t2, sec2
+
+def main(args):
+
+    # check sur l'usage
+    if len(args) != 9:
+        print "\033[31m##\033[36m Usage: \033[33m ./208chevillettes O0 O1 O2 O3 O4 O5 O6 O7 O8\033[31m ##\033[0m"
+        sys.exit(2)
+
+    try:
+        o1 = int(args[0])
+	o2 = int(args[1])
+	o3 = int(args[2])
+	o4 = int(args[3])
+	o5 = int(args[4])
+	o6 = int(args[5])
+	o7 = int(args[6])
+	o8 = int(args[7])
+	o9 = int(args[8])
+    except:
+        print "\033[31mERROR in argument.\033[0m"
+	sys.exit(2)
+
+    # check si un chiffre est negatif ou égal à zéro
+    if o1 < 0 or o2 < 0 or o3 < 0 or o4 < 0 or o5 < 0 or o6 < 0 or o7 < 0 or o8 < 0 or o9 < 0:
+        print "\033[31mERROR in argument must be a positiv integer.\033[0m"
+	sys.exit(2)
+
+    # check si la somme des paramêtre est bien égale à 100
+    if o1 + o2 + o3 + o4 + o5 + o6 + o7 + o8 + o9 != 100:
+        print "\033[31mThe sum of parameters must be 100.\033[0m"
+	sys.exit(2)
+
+    # calcul de probabilité de l'ajustement
+    p = float(((0 * o1) + (1 * o2) + (2 * o3) + (3 * o4) + (4 * o5) + (5 * o6) + (6 * o7) + (7 * o8) + (8 * o9)) / 10000.0)
+
+
+    # agreagation des valeurs
+    value = []
+    value = agregation(o1, o2, o3, o4, o5, o6, o7, o8, o9)
+
+    # calcul des effectif théorique
+    t = []
+    total_t = 0.0
+    res = 0.0
+    x = 0
+    while x < 8:
+	    res = (100.0 * ((math.factorial(100) / (math.factorial(100 - x) * math.factorial(x)))) * pow(p, x) * pow(1.0 - p, 100.0 - x))
+	    t.append(res)
+	    total_t += res
+	    x += 1
+
+    t.append(100 - total_t)
+
+    # calcul des effectif théorique poisson
+    sec = []
+    total_t = 0.0
+    res = 0.0
+    x = 0
+    while x < 8:
+	    res = (100.0 * ((math.exp(-1 * p * 100) * pow(p * 100, x)) / math.factorial(x)))
+	    sec.append(res)
+	    total_t += res
+	    x += 1
+
+    sec.append(100 - total_t)
+
+    # aggregation des effectif théorique en fonction de valeurs
+
+    sec2 = []
+    t2 = []
+    t2 , sec2 = agregation_theorique(o1, o2, o3, o4, o5, o6, o7, o8, o9, t, sec, value)
+
+    # calcul du x²
+    xcarre = 0.0
+    x = 0
+    while (x < len(value)):
+	    xcarre += (pow(value[x] - t2[x], 2) / t2[x])
+	    x += 1
+
+    if len(value) == 9:
+	    print "\033[33m__________________________________________________________________________________________________________________________________________________________\033[0m"
+    elif len(value) == 8:
+	    print "\033[33m__________________________________________________________________________________________________________________________________________\033[0m"
+    elif len(value) == 7:
+	    print "\033[33m__________________________________________________________________________________________________________________________\033[0m"
+    elif len(value) == 6:
+	    print "\033[33m__________________________________________________________________________________________________________\033[0m"
+    elif len(value) == 5:
+	    print "\033[33m__________________________________________________________________________________________\033[0m"
+    elif len(value) == 4:
+	    print "\033[33m__________________________________________________________________________\033[0m"
+    elif len(value) == 3:
+	    print "\033[33m__________________________________________________________\033[0m"
+    elif len(value) == 2:
+	    print "\033[33m__________________________________________\033[0m"
+    else:
+	    print "\033[33m__________________________\033[0m"
+
+    # affichage effectif observé groupé par paquet de 10 minimum
+    print "  \033[33mOx |\033[0m",
+    x = 0
+    while (x < len(value)):
+	    print "\t%d\t|" % (value[x]),
+	    x += 1
+    print " 100   "
+
+    # affichage effectif théorique
+    print "  \033[33mTBx|\033[0m",
+    x = 0
+    while (x < len(t2)):
+	    print "\t%.1f\t|" % (t2[x]),
+	    x += 1
+    print " 100   "
+
+    # affichage effectif théorique
+    print "  \033[33mTPx|\033[0m",
+    x = 0
+    while (x < len(sec2)):
+	    print "\t%.1f\t|" % (sec2[x]),
+	    x += 1
+    print " 100   "
+
+    print "\n\033[32mloi binomiale :\t\t\tB(\033[33m100\033[32m, \033[33m%0.4f\033[32m)" % (p)
+    print "\033[32mloi poisson  :\t\t\tP(\033[33m%0.4f\033[32m)" % (p * 100)
+    print "somme des carrés des écarts :\tX^2 = \033[33m%0.3f\033[32m" % (xcarre)
+    print "degrés de liberté :\t\tv = \033[33m%d\033[32m" % (len(value) - 2)
+    print "validité de l’ajustement :\t\033[33m%d%%\033[32m < P < \033[33m%d%%\033[0m" % (left_pur(len(value) - 2, xcarre), right_pur(len(value) - 2, xcarre))
+
+    choix = raw_input("\033[33mDo you want to display a graphic?[y/n]\033[0m\n")
+    if choix in ('Y', 'y'):
+	    tmp = []
+
+	    tmp.append(o1)
+	    tmp.append(o2)
+	    tmp.append(o3)
+	    tmp.append(o4)
+	    tmp.append(o5)
+	    tmp.append(o6)
+	    tmp.append(o7)
+	    tmp.append(o8)
+	    tmp.append(o9)
+
+	    absc = np.arange(0, 9, 1)
+	    absc2 = np.arange(0, len(value), 1)
+	    plt.plot(absc, tmp, label="data parameters", color='k')
+	    plt.plot(absc2, value, label="data parameters agregation", color='r')
+	    plt.plot(absc, t, label="theoretical effective binomiale", color='b')
+	    plt.plot(absc2, t2, label="theoretical effective agregation binomiale", color='g')
+	    plt.plot(absc, sec, label="theoretical effective poisson", color='m')
+	    plt.plot(absc2, sec2, label="theoretical effective agregation poisson", color='c')
+	    plt.xlabel("data");
+	    plt.ylabel("value");
+	    plt.title("208chevillettes")
+	    plt.legend()
+	    plt.show()
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
