@@ -1,0 +1,74 @@
+#!/usr/bin/python
+# -*- encoding:utf-8 -*-
+
+import sys, math
+import pylab as plt
+import numpy as np
+from math import *
+
+from language import *
+
+def main(args):
+
+    lang = []
+    lang = langage(lang)
+    print_lang = 0
+    choix_lang = raw_input("\033[33mChoose you language by default it will be french\n[French[fr] | German[de] | English[en] | Spanish[sp] | Italian[it]]\n\033[0m")
+    if choix_lang in ('fr', 'de', 'en', 'sp', 'it'):
+        if choix_lang == 'fr':
+            print_lang = 0
+        if choix_lang == 'de':
+            print_lang = 1
+        if choix_lang == 'en':
+            print_lang = 2
+        if choix_lang == 'sp':
+            print_lang = 3
+        if choix_lang == 'it':
+            print_lang = 4
+
+    if len(args) != 3:
+        print lang[print_lang][0]
+        sys.exit(2)
+
+    try:
+        a = int(args[0])
+        b = int(args[1])
+        c = float(args[2])
+    except:
+        print lang[print_lang][1]
+        sys.exit()
+
+    if a < 0 or b < 0 or c < 0:
+        print lang[print_lang][2]
+        sys.exit()
+    if a < b:
+        print lang[print_lang][3]
+        sys.exit()
+    if c > 100.0:
+        print lang[print_lang][4]
+        sys.exit()
+
+    var = float(((((c / 100) * (1 - (c / 100))) / b) * ((a - b) / (a - 1.0))))
+    int_95 = float((((2 * 1.96) * math.sqrt(var)) / 2 * 100))
+    int_99 = float((((2 * 2.58) * math.sqrt(var)) / 2 * 100))
+
+    print lang[print_lang][5] % (a)
+    print lang[print_lang][6] % (b)
+    print lang[print_lang][7] % (c)
+    print lang[print_lang][8] % (var)
+    print lang[print_lang][9] % (((c - int_95), 0)[((c - int_95) < 0)], ((c + int_95), 100)[((c + int_95) > 100)])
+    print lang[print_lang][10] % (((c - int_99), 0)[((c - int_99) < 0)], ((c + int_99), 100)[((c + int_99) > 100)])
+
+    choix = raw_input(lang[print_lang][11])
+    if choix in ('y', 'Y'):
+        labels = 'vote', 'reste'
+        sizes = [c, float(100 -c)]
+        colors = ['gold', 'lightskyblue']
+        explode = (0.1, 0)
+        plt.pie(sizes, explode=explode, labels=labels, colors=colors, autopct='%1.2f%%', shadow=True)
+        plt.title("209sondage")
+        plt.axis('equal')
+        plt.show()
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

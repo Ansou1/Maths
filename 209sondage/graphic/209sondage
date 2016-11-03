@@ -1,0 +1,71 @@
+#!/usr/bin/python
+# -*- encoding:utf-8 -*-
+
+import sys, math
+import pylab as plt
+import numpy as np
+from PyQt4 import QtGui, QtCore
+
+from language import *
+import ImageViewerUI
+
+class ImageViewer(QtGui.QMainWindow, ImageViewerUI.Ui_MainWindow):
+	def __init__(self, parent=None):
+		super(ImageViewer, self).__init__(parent)
+		self.setupUi(self)
+
+		QtCore.QObject.connect(self.buttonOK, QtCore.SIGNAL("clicked()"), self.button_ok)
+		QtCore.QObject.connect(self.buttonCancel, QtCore.SIGNAL("clicked()"), self.button_cancel)
+		QtCore.QObject.connect(self.graphic, QtCore.SIGNAL("clicked(bool)"), self.aff_graphic)
+
+	def aff(self):
+		self.show()
+
+	def button_ok(self):
+		self.AffichageResultat.clear()
+
+		lang = []
+		lang = langage(lang)
+
+		b = int(self.echantillon.value())
+		a = int(self.population.value())
+		c = float(self.pourcentage.value())
+		print_lang = self.langue.currentIndex()
+
+		if b <= a:
+			var = float(((((c / 100) * (1 - (c / 100))) / b) * ((a - b) / (a - 1.0))))
+			int_95 = float((((2 * 1.96) * math.sqrt(var)) / 2 * 100))
+			int_99 = float((((2 * 2.58) * math.sqrt(var)) / 2 * 100))
+
+			self.AffichageResultat.insertPlainText(lang[print_lang][1] % (a))
+			self.AffichageResultat.insertPlainText(lang[print_lang][2] % (b))
+			self.AffichageResultat.insertPlainText(lang[print_lang][3] % (c))
+			self.AffichageResultat.insertPlainText(lang[print_lang][4] % (var))
+			self.AffichageResultat.insertPlainText(lang[print_lang][5] % (((c - int_95), 0)[((c - int_95) < 0)], ((c + int_95), 100)[((c + int_95) > 100)]))
+			self.AffichageResultat.insertPlainText(lang[print_lang][6] % (((c - int_99), 0)[((c - int_99) < 0)], ((c + int_99), 100)[((c + int_99) > 100)]))
+
+		else:
+			QtGui.QMessageBox.warning(self, "warning", lang[print_lang][0])
+			self.button_cancel()
+
+	def button_cancel(self):
+		self.AffichageResultat.clear()
+		self.echantillon.setValue(0)
+		self.population.setValue(0)
+		self.pourcentage.setValue(0)
+
+	def aff_graphic(self):
+		labels = 'vote', 'reste'
+		sizes = [self.pourcentage.value(), float(100 - self.pourcentage.value())]
+		colors = ['gold', 'lightskyblue']
+		explode = (0.1, 0)
+		plt.pie(sizes, explode=explode, labels=labels, colors=colors, autopct='%1.2f%%', shadow=True)
+		plt.title("209sondage")
+		plt.axis('equal')
+		plt.show()
+
+if __name__=='__main__':
+	app = QtGui.QApplication(sys.argv)
+	imageViewer = ImageViewer()
+	imageViewer.aff()
+	app.exec_()
